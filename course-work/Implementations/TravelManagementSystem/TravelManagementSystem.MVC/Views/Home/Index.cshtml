@@ -1,0 +1,53 @@
+﻿@using TravelManagementSystem.MVC.Extensions
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewBag.Title = "Начало";
+    var isLoggedIn = HttpContextAccessor.HttpContext?.Session.GetString("JWToken") != null;
+    var isAdmin = HttpContextAccessor.HttpContext?.IsAdmin() == true;
+}
+
+<div class="text-center mt-4">
+    <h1 class="display-4 mb-3">
+        <i class="bi bi-globe2 me-2"></i>Добре дошли в TravelApp!
+    </h1>
+    <p class="lead mb-4">Система за управление на пътувания, дестинации и потребители.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow rounded-4 h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check-fill display-5 text-success mb-3"></i>
+                    <h5 class="card-title">Пътувания</h5>
+                    <p class="card-text">Разгледай, създай или редактирай пътувания в системата.</p>
+                    <a asp-controller="Trips" asp-action="Index" class="btn btn-outline-success">Към пътуванията</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow rounded-4 h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-pin-map-fill display-5 text-primary mb-3"></i>
+                    <h5 class="card-title">Дестинации</h5>
+                    <p class="card-text">Управлявай наличните дестинации и открий нови места.</p>
+                    <a asp-controller="Destinations" asp-action="Index" class="btn btn-outline-primary">Към дестинациите</a>
+                </div>
+            </div>
+        </div>
+
+        @if (isLoggedIn && isAdmin)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card shadow rounded-4 h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill display-5 text-dark mb-3"></i>
+                        <h5 class="card-title">Потребители</h5>
+                        <p class="card-text">Виж всички регистрирани потребители в системата.</p>
+                        <a asp-controller="Users" asp-action="Index" class="btn btn-outline-dark">Към потребителите</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
