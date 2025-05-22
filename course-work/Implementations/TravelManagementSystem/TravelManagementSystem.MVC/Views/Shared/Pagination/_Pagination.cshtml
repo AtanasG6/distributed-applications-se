@@ -6,15 +6,15 @@
 
 @{
 	var paging = Model.Paging;
-	var routeValues = Model.RouteValues;
+	var routeValues = new RouteValueDictionary(Model.RouteValues);
 }
 
 <form method="get" class="d-flex justify-content-between align-items-center mt-4">
 
 	<div class="input-group w-auto me-3">
-		<label class="input-group-text" for="pageSize">Елементи на страница</label>
-		<select class="form-select" name="pageSize" onchange="this.form.submit()">
-			@foreach (var size in new[] { 5, 10, 20, 50 })
+		<label class="input-group-text" for="PageSize">Елементи на страница</label>
+		<select class="form-select" id="PageSize" name="PageSize" onchange="this.form.submit()">
+			@foreach (var size in new[] { 1, 5, 10, 20, 50 })
 			{
 				<option value="@size" selected="@(paging.PageSize == size ? "selected" : null)">
 					@size
@@ -30,11 +30,13 @@
 						paging,
 						page =>
 						{
-							var newRouteValues = new RouteValueDictionary(routeValues)
-			{
-				["page"] = page,
-				["pageSize"] = paging.PageSize
-			};
+							var newRouteValues = new RouteValueDictionary(routeValues);
+
+							// Изчистване на стари стойности ако има
+							newRouteValues.Remove("pageSize");
+							newRouteValues["Page"] = page;
+							newRouteValues["PageSize"] = paging.PageSize;
+
 							return Url.Action(null, newRouteValues);
 						},
 						new PagedListRenderOptions
@@ -50,9 +52,13 @@
 		</nav>
 	}
 
+	@* Скрито поле за рестартиране на страницата до 1 при смяна на PageSize *@
+	<input type="hidden" name="Page" value="1" />
+
+	@* Други route параметри, без дублиращи Page/PageSize *@
 	@foreach (var kvp in routeValues)
 	{
-		if (kvp.Key is not "page" and not "pageSize" && kvp.Value is not null)
+		if (kvp.Key is not "Page" and not "PageSize" && kvp.Value is not null)
 		{
 			<input type="hidden" name="@kvp.Key" value="@kvp.Value" />
 		}
