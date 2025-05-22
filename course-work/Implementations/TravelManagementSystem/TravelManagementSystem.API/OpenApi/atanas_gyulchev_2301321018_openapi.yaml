@@ -3,14 +3,11 @@ info:
   title: Система за управление на пътувания (TravelManagementSystem)
   description: >
     API документация за система за управление на пътувания, предоставяща
-    функционалности за управление на потребители,  дестинации, пътувания и
-    интеграция с външни API услуги за информация за държави и прогноза за
-    времето.
+    функционалности за управление на потребители, 
 
-      ## Използвани външни API услуги:
+    дестинации, пътувания и интеграция с външни API услуги за информация за
+    държави и прогноза за времето.
 
-      - [OpenWeather](https://openweathermap.org/api) – за прогноза за времето
-      - [REST Countries](https://restcountries.com/) – за информация за държави
 
     ## Основни модули:
 
@@ -26,12 +23,48 @@ info:
     - **Външни услуги**: Интеграция с външни API за информация за държави и
     прогноза за времето
 
+    - **AI Генерирано съдържание**: Интересни факти за дестинации с помощта на
+    локален Ollama модел
+
+
     ## Роли:
 
     - **Admin**: Пълни права за управление на всички ресурси, включително
     потребители
 
     - **User**: Права за работа с дестинации и пътувания
+
+
+    ## Използвани външни API услуги:
+
+    - **Countries API** (https://restcountries.com): Предоставя подробна
+    информация за държави, включително основни географски данни, население,
+    езици, валути и други.
+
+    - **OpenWeatherMap API** (https://openweathermap.org): Предоставя текуща
+    метеорологична информация и прогнози за времето за различни градове по
+    света.
+
+
+    ## Локален Ollama AI модел:
+
+    Системата интегрира локален Ollama AI модел за генериране на интересни факти
+    за дестинации. За да използвате тази функционалност:
+
+    1. Инсталирайте Ollama от https://ollama.com
+
+    2. Изтеглете поне един от поддържаните модели с командата:
+       - `ollama pull llama3` (препоръчителен модел)
+       - `ollama pull mistral`
+       - `ollama pull gemma`
+       - `ollama pull phi`
+    3. Уверете се, че Ollama услугата работи локално на порт 11434
+
+
+    API заявките към AI модела се обработват локално, без да се изпращат данни
+    към външни услуги, 
+
+    което осигурява по-добра производителност и защита на данните.
   version: '1.0'
   contact:
     name: Атанас Гюлчев
@@ -52,6 +85,10 @@ tags:
     description: Планиране и управление на пътувания
   - name: Външни услуги
     description: Интеграция с външни API за информация за държави и прогноза за времето
+  - name: AI Генерирано съдържание
+    description: >-
+      Услуги, предоставящи AI генерирано съдържание използвайки локален Ollama
+      модел
 paths:
   /Authentication/register:
     post:
@@ -91,7 +128,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StringApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               examples:
                 invalidData:
                   value:
@@ -147,7 +184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StringApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
                 message: >-
@@ -245,7 +282,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за дестинацията.
+                data: null
+                errors:
+                  - Държавата е задължителна.
+                  - Градът е задължителен.
         '401':
           $ref: '#/components/responses/Unauthorized'
       security:
@@ -279,10 +323,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DestinationDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Дестинацията не е намерена.
                 data: null
                 errors:
                   - Записът не е намерен.
@@ -321,7 +365,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за дестинацията.
+                data: null
+                errors:
+                  - Държавата е задължителна.
+                  - Градът е задължителен.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -329,10 +380,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DestinationDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Дестинацията не е намерена за обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за обновяване.
@@ -389,7 +440,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни patch операции или данни.
+                data: null
+                errors:
+                  - Невалидна операция за path /description.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -397,10 +454,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DestinationDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Дестинацията не е намерена за частично обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за частично обновяване.
@@ -430,7 +487,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: true
                 message: Записът е изтрит успешно.
@@ -443,13 +500,119 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Дестинацията не е намерена за изтриване.
                 data: null
                 errors:
                   - Записът не е намерен за изтриване.
+      security:
+        - bearerAuth: []
+  '/Destinations/{id}/interesting-facts':
+    get:
+      tags:
+        - Дестинации
+        - AI Генерирано съдържание
+      summary: Генериране на интересни факти за дестинация
+      description: >
+        Генерира три интересни факта за дестинацията, използвайки локално
+        инсталиран
+
+        Ollama AI модел. Фактите са генерирани на база името на дестинацията
+        (град и държава).
+
+
+        Забележка: Генерираното съдържание може да варира при всяко извикване и
+        не се гарантира неговата точност.
+      operationId: getInterestingFactsForDestination
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор на дестинацията
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: model
+          in: query
+          description: >-
+            Име на Ollama модела, който да се използва (по подразбиране
+            "llama3")
+          required: false
+          schema:
+            type: string
+            default: llama3
+            enum:
+              - llama3
+              - mistral
+              - gemma
+              - phi
+        - name: language
+          in: query
+          description: 'Език, на който да бъдат генерирани фактите'
+          required: false
+          schema:
+            type: string
+            default: bg
+            enum:
+              - bg
+              - en
+      responses:
+        '200':
+          description: Успешно генерирани интересни факти
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestingFactsApiResponse'
+              example:
+                success: true
+                message: Интересни факти за дестинацията са генерирани успешно.
+                data:
+                  destinationName: 'Пловдив, България'
+                  facts:
+                    - >-
+                      Пловдив е един от най-старите градове в Европа, датиращ от
+                      около 6000 г. пр.н.е., което го прави по-стар от Рим и
+                      Атина.
+                    - >-
+                      Старият град на Пловдив е известен със своята възрожденска
+                      архитектура и е построен върху седем хълма, поради което
+                      градът е наричан и 'Градът на седемте хълма'.
+                    - >-
+                      През 2019 г. Пловдив бе Европейска столица на културата,
+                      което доведе до значителни инвестиции в инфраструктурата и
+                      културните пространства на града.
+                errors: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Дестинацията не е намерена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Дестинацията не е намерена.
+                data: null
+                errors:
+                  - Записът не е намерен.
+        '500':
+          description: Грешка при комуникацията с Ollama модела
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Възникна грешка при генерирането на интересни факти.
+                data: null
+                errors:
+                  - Грешка при комуникацията с Ollama модела.
+                  - >-
+                    Моделът не е наличен локално. Моля, инсталирайте го с
+                    командата 'ollama pull llama3'.
       security:
         - bearerAuth: []
   '/External/country/{name}':
@@ -500,10 +663,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CountryInfoDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Държавата не беше намерена.
                 data: null
                 errors:
                   - Държавата не беше намерена.
@@ -560,10 +723,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WeatherForecastDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Градът не беше намерен или няма прогноза.
                 data: null
                 errors:
                   - Градът не беше намерен или няма прогноза.
@@ -666,7 +829,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за пътуването.
+                data: null
+                errors:
+                  - Заглавието е задължително.
+                  - Началната дата трябва да е преди крайната дата.
         '401':
           $ref: '#/components/responses/Unauthorized'
       security:
@@ -700,10 +870,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Пътуването не е намерено.
                 data: null
                 errors:
                   - Записът не е намерен.
@@ -742,7 +912,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за пътуването.
+                data: null
+                errors:
+                  - Заглавието е задължително.
+                  - Началната дата трябва да е преди крайната дата.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -750,10 +927,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Пътуването не е намерено за обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за обновяване.
@@ -810,7 +987,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни patch операции или данни.
+                data: null
+                errors:
+                  - Невалидна операция за path /title.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -818,10 +1001,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Пътуването не е намерено за частично обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за частично обновяване.
@@ -851,7 +1034,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: true
                 message: Записът е изтрит успешно.
@@ -864,10 +1047,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Пътуването не е намерено за изтриване.
                 data: null
                 errors:
                   - Записът не е намерен за изтриване.
@@ -968,7 +1151,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за потребителя.
+                data: null
+                errors:
+                  - Потребителското име е задължително.
+                  - Имейлът трябва да е валиден.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1008,10 +1198,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Потребителят не е намерен.
                 data: null
                 errors:
                   - Записът не е намерен.
@@ -1052,7 +1242,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни данни за потребителя.
+                data: null
+                errors:
+                  - Потребителското име е задължително.
+                  - Имейлът трябва да е валиден.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1062,10 +1259,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Потребителят не е намерен за обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за обновяване.
@@ -1123,7 +1320,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: false
+                message: Невалидни patch операции или данни.
+                data: null
+                errors:
+                  - Невалидна операция за path /username.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1133,10 +1336,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserDtoApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Потребителят не е намерен за частично обновяване.
                 data: null
                 errors:
                   - Записът не е намерен за частично обновяване.
@@ -1168,7 +1371,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: true
                 message: Записът е изтрит успешно.
@@ -1183,10 +1386,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ObjectApiResponse'
+                $ref: '#/components/schemas/ApiResponse'
               example:
                 success: false
-                message: null
+                message: Потребителят не е намерен за изтриване.
                 data: null
                 errors:
                   - Записът не е намерен за изтриване.
@@ -1249,6 +1452,30 @@ components:
               - title
               - status
   schemas:
+    ApiResponse:
+      type: object
+      description: Базов клас за API отговор
+      properties:
+        success:
+          type: boolean
+          description: 'Флаг, указващ дали заявката е успешна'
+          example: true
+        message:
+          type: string
+          nullable: true
+          description: Съобщение за успех или грешка
+          example: Операцията е изпълнена успешно.
+        data:
+          nullable: true
+          description: Данни от отговора (може да е null)
+        errors:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Списък с грешки (само при неуспешна заявка)
+      required:
+        - success
     ValidationErrorResponse:
       type: object
       description: Отговор при грешка за валидация
@@ -1287,6 +1514,70 @@ components:
         - title
         - status
         - errors
+    InterestingFact:
+      type: object
+      description: Интересен факт за дестинация
+      properties:
+        fact:
+          type: string
+          description: Интересен факт за дестинацията
+          example: >-
+            Пловдив е един от най-старите градове в Европа, датиращ от около
+            6000 г. пр.н.е., което го прави по-стар от Рим и Атина.
+      required:
+        - fact
+    InterestingFactsData:
+      type: object
+      description: Данни с интересни факти за дестинация
+      properties:
+        destinationName:
+          type: string
+          description: 'Име на дестинацията (град, държава)'
+          example: 'Пловдив, България'
+        facts:
+          type: array
+          description: Списък с интересни факти
+          items:
+            type: string
+          example:
+            - >-
+              Пловдив е един от най-старите градове в Европа, датиращ от около
+              6000 г. пр.н.е., което го прави по-стар от Рим и Атина.
+            - >-
+              Старият град на Пловдив е известен със своята възрожденска
+              архитектура и е построен върху седем хълма, поради което градът е
+              наричан и 'Градът на седемте хълма'.
+            - >-
+              През 2019 г. Пловдив бе Европейска столица на културата, което
+              доведе до значителни инвестиции в инфраструктурата и културните
+              пространства на града.
+      required:
+        - destinationName
+        - facts
+    InterestingFactsApiResponse:
+      type: object
+      description: 'Отговор, съдържащ интересни факти за дестинация'
+      properties:
+        success:
+          type: boolean
+          description: 'Флаг, указващ дали заявката е успешна'
+          example: true
+        message:
+          type: string
+          nullable: true
+          description: Съобщение за успех или грешка
+          example: Интересни факти за дестинацията са генерирани успешно.
+        data:
+          $ref: '#/components/schemas/InterestingFactsData'
+          description: Данни с интересни факти (само при успешна заявка)
+        errors:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Списък с грешки (само при неуспешна заявка)
+      required:
+        - success
     CountryInfoDto:
       type: object
       description: 'Информация за държава, получена от външно API'
@@ -1410,89 +1701,6 @@ components:
         - description
         - latitude
         - longitude
-    CreateTripDto:
-      type: object
-      description: DTO за създаване на ново пътуване
-      properties:
-        title:
-          type: string
-          description: Заглавие на пътуването
-          example: Уикенд в Пловдив
-          maxLength: 100
-        destinationId:
-          type: integer
-          format: int32
-          description: Идентификатор на съществуваща дестинация
-          example: 1
-          minimum: 1
-        startDate:
-          type: string
-          format: date-time
-          description: Начална дата и час на пътуването
-          example: '2025-06-15T08:00:00Z'
-        endDate:
-          type: string
-          format: date-time
-          description: Крайна дата и час на пътуването
-          example: '2025-06-17T18:00:00Z'
-        price:
-          type: number
-          format: decimal
-          description: Цена на пътуването
-          example: 350
-          minimum: 0
-      required:
-        - title
-        - destinationId
-        - startDate
-        - endDate
-        - price
-    CreateUserDto:
-      type: object
-      description: DTO за създаване на нов потребител (само от администратор)
-      properties:
-        username:
-          type: string
-          description: Потребителско име (уникално в системата)
-          example: ivanpetrov
-          maxLength: 50
-        email:
-          type: string
-          description: Имейл адрес на потребителя (уникален в системата)
-          example: ivan.petrov@example.com
-          format: email
-          maxLength: 100
-        password:
-          type: string
-          description: Парола на потребителя (минимум 6 символа)
-          example: Secret123!
-          minLength: 6
-          maxLength: 100
-          format: password
-        role:
-          type: string
-          description: Роля на потребителя в системата
-          example: User
-          enum:
-            - User
-            - Admin
-        dateOfBirth:
-          type: string
-          format: date-time
-          description: Дата на раждане на потребителя
-          example: '1990-05-15T00:00:00Z'
-        phoneNumber:
-          type: string
-          description: Телефонен номер на потребителя
-          example: '+359888123456'
-          maxLength: 20
-      required:
-        - username
-        - email
-        - password
-        - role
-        - dateOfBirth
-        - phoneNumber
     DestinationDto:
       type: object
       description: DTO за преглед на дестинация
@@ -1598,104 +1806,6 @@ components:
               items:
                 $ref: '#/components/schemas/DestinationDto'
               description: Списък с дестинации за текущата страница
-    LoginUserDto:
-      type: object
-      description: DTO за влизане в системата
-      properties:
-        username:
-          type: string
-          description: Потребителско име
-          example: ivanpetrov
-        password:
-          type: string
-          description: Парола на потребителя
-          example: Secret123!
-          format: password
-      required:
-        - username
-        - password
-    ObjectApiResponse:
-      type: object
-      description: Общ отговор без специфични данни (използва се при изтриване)
-      properties:
-        success:
-          type: boolean
-          description: 'Флаг, указващ дали заявката е успешна'
-          example: true
-        message:
-          type: string
-          nullable: true
-          description: Съобщение за успех или грешка
-          example: Записът е изтрит успешно.
-        data:
-          nullable: true
-          description: Данни (обикновено null при изтриване)
-        errors:
-          type: array
-          items:
-            type: string
-          nullable: true
-          description: Списък с грешки (само при неуспешна заявка)
-      required:
-        - success
-    Operation:
-      type: object
-      description: Представлява операция на JSON Patch (RFC 6902)
-      properties:
-        operationType:
-          $ref: '#/components/schemas/OperationType'
-          description: Тип на операцията като enum
-        path:
-          type: string
-          nullable: true
-          description: 'Път до свойството, което се манипулира'
-          example: /description
-        op:
-          type: string
-          nullable: true
-          description: >-
-            Текстово представяне на операцията (add, remove, replace, copy,
-            move, test)
-          example: replace
-          enum:
-            - add
-            - remove
-            - replace
-            - copy
-            - move
-            - test
-        from:
-          type: string
-          nullable: true
-          description: Източник на свойство при операции copy и move
-          example: /oldProperty
-        value:
-          nullable: true
-          description: 'Нова стойност за свойството при операции add, replace и test'
-          example: Нова стойност
-      required:
-        - op
-        - path
-    OperationType:
-      type: integer
-      format: int32
-      description: Изброените типове операции на JSON Patch
-      enum:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
-        - 6
-      x-enum-descriptions:
-        - Add (0) - добавяне на стойност
-        - Remove (1) - премахване на свойство
-        - Replace (2) - замяна на стойност
-        - Move (3) - преместване на стойност
-        - Copy (4) - копиране на стойност
-        - Test (5) - тестване на стойност
-        - Invalid (6) - невалидна операция
     PagedResponseBase:
       type: object
       description: Базов клас за отговори с пагинация
@@ -1803,87 +1913,80 @@ components:
           example: 24.7453
           minimum: -180
           maximum: 180
-    PatchTripDto:
+    Operation:
       type: object
-      description: DTO за частично обновяване на пътуване
+      description: Представлява операция на JSON Patch (RFC 6902)
       properties:
-        title:
+        operationType:
+          $ref: '#/components/schemas/OperationType'
+          description: Тип на операцията като enum
+        path:
           type: string
           nullable: true
-          description: Заглавие на пътуването
-          example: Обновено заглавие на пътуването
-          maxLength: 100
-        destinationId:
-          type: integer
-          nullable: true
-          format: int32
-          description: Идентификатор на съществуваща дестинация
-          example: 2
-          minimum: 1
-        startDate:
+          description: 'Път до свойството, което се манипулира'
+          example: /description
+        op:
           type: string
           nullable: true
-          format: date-time
-          description: Начална дата и час на пътуването
-          example: '2025-07-15T08:00:00Z'
-        endDate:
+          description: >-
+            Текстово представяне на операцията (add, remove, replace, copy,
+            move, test)
+          example: replace
+          enum:
+            - add
+            - remove
+            - replace
+            - copy
+            - move
+            - test
+        from:
           type: string
           nullable: true
-          format: date-time
-          description: Крайна дата и час на пътуването
-          example: '2025-07-17T18:00:00Z'
-        price:
-          type: number
+          description: Източник на свойство при операции copy и move
+          example: /oldProperty
+        value:
           nullable: true
-          format: decimal
-          description: Цена на пътуването
-          example: 450
-          minimum: 0
-    PatchUserDto:
+          description: 'Нова стойност за свойството при операции add, replace и test'
+          example: Нова стойност
+      required:
+        - op
+        - path
+    OperationType:
+      type: integer
+      format: int32
+      description: Изброените типове операции на JSON Patch
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+      x-enum-descriptions:
+        - Add (0) - добавяне на стойност
+        - Remove (1) - премахване на свойство
+        - Replace (2) - замяна на стойност
+        - Move (3) - преместване на стойност
+        - Copy (4) - копиране на стойност
+        - Test (5) - тестване на стойност
+        - Invalid (6) - невалидна операция
+    LoginUserDto:
       type: object
-      description: DTO за частично обновяване на потребител
+      description: DTO за влизане в системата
       properties:
         username:
           type: string
-          nullable: true
-          description: Потребителско име (уникално в системата)
-          example: новоИме
-          maxLength: 50
-        email:
-          type: string
-          nullable: true
-          description: Имейл адрес на потребителя (уникален в системата)
-          example: нов.имейл@example.com
-          format: email
-          maxLength: 100
+          description: Потребителско име
+          example: ivanpetrov
         password:
           type: string
-          nullable: true
-          description: Парола на потребителя (минимум 6 символа)
-          example: НоваПарола123!
-          minLength: 6
-          maxLength: 100
+          description: Парола на потребителя
+          example: Secret123!
           format: password
-        role:
-          type: string
-          nullable: true
-          description: Роля на потребителя в системата
-          example: Admin
-          enum:
-            - User
-            - Admin
-        dateOfBirth:
-          type: string
-          nullable: true
-          format: date-time
-          description: Дата на раждане на потребителя
-          example: '1985-10-25T00:00:00Z'
-        phoneNumber:
-          type: string
-          nullable: true
-          description: Телефонен номер на потребителя
-          example: '+359888987654'
-          maxLength: 20
+      required:
+        - username
+        - password
     RegisterUserDto:
       type: object
       description: DTO за регистрация на нов потребител
@@ -1947,6 +2050,118 @@ components:
           description: Списък с грешки (само при неуспешна заявка)
       required:
         - success
+    UpdateDestinationDto:
+      type: object
+      description: DTO за пълно обновяване на дестинация
+      properties:
+        country:
+          type: string
+          description: 'Държава, в която се намира дестинацията'
+          example: България
+          maxLength: 100
+        city:
+          type: string
+          description: Град или населено място на дестинацията
+          example: Пловдив
+          maxLength: 100
+        description:
+          type: string
+          description: Описание на дестинацията
+          example: Актуализирано описание на дестинацията.
+          maxLength: 500
+        latitude:
+          type: number
+          format: double
+          description: Географска ширина на дестинацията
+          example: 42.1354
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          description: Географска дължина на дестинацията
+          example: 24.7453
+          minimum: -180
+          maximum: 180
+      required:
+        - country
+        - city
+        - description
+        - latitude
+        - longitude
+    CreateTripDto:
+      type: object
+      description: DTO за създаване на ново пътуване
+      properties:
+        title:
+          type: string
+          description: Заглавие на пътуването
+          example: Уикенд в Пловдив
+          maxLength: 100
+        destinationId:
+          type: integer
+          format: int32
+          description: Идентификатор на съществуваща дестинация
+          example: 1
+          minimum: 1
+        startDate:
+          type: string
+          format: date-time
+          description: Начална дата и час на пътуването
+          example: '2025-06-15T08:00:00Z'
+        endDate:
+          type: string
+          format: date-time
+          description: Крайна дата и час на пътуването
+          example: '2025-06-17T18:00:00Z'
+        price:
+          type: number
+          format: decimal
+          description: Цена на пътуването
+          example: 350
+          minimum: 0
+      required:
+        - title
+        - destinationId
+        - startDate
+        - endDate
+        - price
+    PatchTripDto:
+      type: object
+      description: DTO за частично обновяване на пътуване
+      properties:
+        title:
+          type: string
+          nullable: true
+          description: Заглавие на пътуването
+          example: Обновено заглавие на пътуването
+          maxLength: 100
+        destinationId:
+          type: integer
+          nullable: true
+          format: int32
+          description: Идентификатор на съществуваща дестинация
+          example: 2
+          minimum: 1
+        startDate:
+          type: string
+          nullable: true
+          format: date-time
+          description: Начална дата и час на пътуването
+          example: '2025-07-15T08:00:00Z'
+        endDate:
+          type: string
+          nullable: true
+          format: date-time
+          description: Крайна дата и час на пътуването
+          example: '2025-07-17T18:00:00Z'
+        price:
+          type: number
+          nullable: true
+          format: decimal
+          description: Цена на пътуването
+          example: 450
+          minimum: 0
     TripDto:
       type: object
       description: DTO за преглед на пътуване
@@ -2051,45 +2266,6 @@ components:
               items:
                 $ref: '#/components/schemas/TripDto'
               description: Списък с пътувания за текущата страница
-    UpdateDestinationDto:
-      type: object
-      description: DTO за пълно обновяване на дестинация
-      properties:
-        country:
-          type: string
-          description: 'Държава, в която се намира дестинацията'
-          example: България
-          maxLength: 100
-        city:
-          type: string
-          description: Град или населено място на дестинацията
-          example: Пловдив
-          maxLength: 100
-        description:
-          type: string
-          description: Описание на дестинацията
-          example: Актуализирано описание на дестинацията.
-          maxLength: 500
-        latitude:
-          type: number
-          format: double
-          description: Географска ширина на дестинацията
-          example: 42.1354
-          minimum: -90
-          maximum: 90
-        longitude:
-          type: number
-          format: double
-          description: Географска дължина на дестинацията
-          example: 24.7453
-          minimum: -180
-          maximum: 180
-      required:
-        - country
-        - city
-        - description
-        - latitude
-        - longitude
     UpdateTripDto:
       type: object
       description: DTO за пълно обновяване на пътуване
@@ -2127,6 +2303,97 @@ components:
         - startDate
         - endDate
         - price
+    CreateUserDto:
+      type: object
+      description: DTO за създаване на нов потребител (само от администратор)
+      properties:
+        username:
+          type: string
+          description: Потребителско име (уникално в системата)
+          example: ivanpetrov
+          maxLength: 50
+        email:
+          type: string
+          description: Имейл адрес на потребителя (уникален в системата)
+          example: ivan.petrov@example.com
+          format: email
+          maxLength: 100
+        password:
+          type: string
+          description: Парола на потребителя (минимум 6 символа)
+          example: Secret123!
+          minLength: 6
+          maxLength: 100
+          format: password
+        role:
+          type: string
+          description: Роля на потребителя в системата
+          example: User
+          enum:
+            - User
+            - Admin
+        dateOfBirth:
+          type: string
+          format: date-time
+          description: Дата на раждане на потребителя
+          example: '1990-05-15T00:00:00Z'
+        phoneNumber:
+          type: string
+          description: Телефонен номер на потребителя
+          example: '+359888123456'
+          maxLength: 20
+      required:
+        - username
+        - email
+        - password
+        - role
+        - dateOfBirth
+        - phoneNumber
+    PatchUserDto:
+      type: object
+      description: DTO за частично обновяване на потребител
+      properties:
+        username:
+          type: string
+          nullable: true
+          description: Потребителско име (уникално в системата)
+          example: новоИме
+          maxLength: 50
+        email:
+          type: string
+          nullable: true
+          description: Имейл адрес на потребителя (уникален в системата)
+          example: нов.имейл@example.com
+          format: email
+          maxLength: 100
+        password:
+          type: string
+          nullable: true
+          description: Парола на потребителя (минимум 6 символа)
+          example: НоваПарола123!
+          minLength: 6
+          maxLength: 100
+          format: password
+        role:
+          type: string
+          nullable: true
+          description: Роля на потребителя в системата
+          example: Admin
+          enum:
+            - User
+            - Admin
+        dateOfBirth:
+          type: string
+          nullable: true
+          format: date-time
+          description: Дата на раждане на потребителя
+          example: '1985-10-25T00:00:00Z'
+        phoneNumber:
+          type: string
+          nullable: true
+          description: Телефонен номер на потребителя
+          example: '+359888987654'
+          maxLength: 20
     UpdateUserDto:
       type: object
       description: DTO за пълно обновяване на потребител
