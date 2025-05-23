@@ -15,6 +15,8 @@ using TravelManagementSystem.Domain.Repositories.Interfaces;
 using TravelManagementSystem.Infrastructure.Persistence;
 using TravelManagementSystem.Infrastructure.Repositories.Implementations;
 using TravelManagementSystem.Infrastructure.Seeding;
+using Microsoft.AspNetCore.Mvc;
+using TravelManagementSystem.API.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,11 +62,21 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidateModelStateFilter>(); 
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddControllers()
         .AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
-        }); ;
+        }); 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
