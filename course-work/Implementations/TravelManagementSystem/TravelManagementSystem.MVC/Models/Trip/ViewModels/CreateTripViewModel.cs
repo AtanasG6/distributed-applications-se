@@ -12,7 +12,7 @@ namespace TravelManagementSystem.MVC.Models.Trip.ViewModels
         [Required(ErrorMessage = "Трябва да се избере валидна дестинация.")]
         [Range(1, int.MaxValue, ErrorMessage = "Трябва да се избере валидна дестинация.")]
         [Display(Name = "Дестинация")]
-        public int DestinationId { get; set; }
+        public int? DestinationId { get; set; }
 
         [Required(ErrorMessage = "Началната дата е задължителна.")]
         [DataType(DataType.Date)]
