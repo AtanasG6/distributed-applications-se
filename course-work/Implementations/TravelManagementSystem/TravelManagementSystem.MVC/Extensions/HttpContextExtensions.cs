@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace TravelManagementSystem.MVC.Extensions
 {
@@ -21,5 +22,19 @@ namespace TravelManagementSystem.MVC.Extensions
         {
             return context.GetUserRole() == "Admin";
         }
+
+        public static string? GetUsername(this HttpContext context)
+        {
+            var token = context.Session.GetString("JWToken");
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var usernameClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            return usernameClaim;
+        }
+
     }
 }

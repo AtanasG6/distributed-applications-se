@@ -46,7 +46,7 @@ namespace TravelManagementSystem.MVC.Controllers
                 return View(model);
             }
 
-            return RedirectToAction("Index", "Trips");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
