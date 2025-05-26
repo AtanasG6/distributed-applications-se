@@ -65,8 +65,8 @@ else
 							<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Не</span>
 						}
 					</td>
-					<td>@user.CreatedOn.ToString("yyyy-MM-dd HH:mm")</td>
-					<td>@(user.UpdatedOn?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+					<td>@user.CreatedOn.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+					<td>@(user.UpdatedOn?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
 					<td>
 						<div class="d-flex gap-2 flex-wrap">
 							<a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-info">

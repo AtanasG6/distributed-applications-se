@@ -60,8 +60,8 @@ else
 					<td>@d.Description</td>
 					<td>@($"{d.Latitude:F4}, {d.Longitude:F4}")</td>
 					<td>@d.CreatedBy</td>
-					<td>@d.CreatedOn.ToString("yyyy-MM-dd HH:mm")</td>
-					<td>@(d.UpdatedOn?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+					<td>@d.CreatedOn.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+					<td>@(d.UpdatedOn?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
 					<td>@(d.UpdatedBy ?? "-")</td>
 					<td>
 						@if (d.IsActive)

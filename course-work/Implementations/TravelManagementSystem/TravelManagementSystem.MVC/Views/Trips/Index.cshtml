@@ -62,9 +62,9 @@ else
 					<td>@trip.EndDate.ToShortDateString()</td>
 					<td>@trip.Price.ToString("F2") лв.</td>
 					<td>@trip.CreatedBy</td>
-					<td>@trip.CreatedOn.ToString("yyyy-MM-dd HH:mm")</td>
+					<td>@trip.CreatedOn.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
 					<td>@(trip.UpdatedBy ?? "-")</td>
-					<td>@(trip.UpdatedOn?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+					<td>@(trip.UpdatedOn?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
 					<td>
 						@if (trip.IsActive)
 						{
