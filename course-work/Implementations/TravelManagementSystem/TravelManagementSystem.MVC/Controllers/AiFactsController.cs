@@ -12,7 +12,7 @@ namespace TravelManagementSystem.MVC.Controllers
             _aiService = aiService;
         }
 
-        [HttpGet]
+        [HttpGet, HttpPost]
         public async Task<IActionResult> Index(string? destinationName)
         {
             if (!string.IsNullOrWhiteSpace(destinationName))
