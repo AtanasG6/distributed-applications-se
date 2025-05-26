@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TravelManagementSystem.MVC.Extensions;
 using TravelManagementSystem.MVC.Filters;
 using TravelManagementSystem.MVC.Models.User.Parameters;
 using TravelManagementSystem.MVC.Models.User.ViewModels;
@@ -74,10 +75,19 @@ namespace TravelManagementSystem.MVC.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create() => View(new CreateUserViewModel
+        public IActionResult Create()
         {
-            DateOfBirth = new DateTime(2000, 1, 1)
-        });
+            if (!HttpContext.IsAdmin())
+            {
+                TempData["Error"] = "Нямате достъп до тази страница.";
+                return RedirectToAction("Index");
+            }
+
+            return View(new CreateUserViewModel
+            {
+                DateOfBirth = new DateTime(2000, 1, 1)
+            });
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

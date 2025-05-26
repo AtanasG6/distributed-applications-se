@@ -47,7 +47,6 @@ namespace TravelManagementSystem.Infrastructure.Repositories.Implementations
             return await query.ToPagedListAsync(parameters.Page, parameters.PageSize);
         }
 
-
         //public async Task<int> CountAsync(QueryParameters parameters)
         //{
         //    var userId = _httpContextAccessor.HttpContext.GetUserId();
