@@ -21,6 +21,12 @@ namespace TravelManagementSystem.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] UserFilterParameters filters)
         {
+            //if (!HttpContext.IsAdmin())
+            //{
+            //    TempData["Error"] = "Нямате достъп до потребителите.";
+            //    return RedirectToAction("Index", "Home");
+            //}
+
             var queryBuilder = new List<string>();
 
             if (!string.IsNullOrWhiteSpace(filters.Username))
